@@ -11,28 +11,29 @@ concurrency:
 
 permissions:
   pull-requests: write
-  
+
 jobs:
   diff:
     runs-on: distroless-ci-large-ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          go-version: "1.21"
-      - uses: actions/cache@v4
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.25"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             ~/.cache/bazel-repo
-          key: bazel-cache-deps-ci2-${{ github.sha }}
+          key: bazel-cache-deps-ci2-${{ hashFiles('.bazelversion') }}-${{ github.sha }}
           restore-keys: |
-            bazel-cache-deps-ci2-${{ github.sha }}
-            bazel-cache-deps-ci2-
+            bazel-cache-deps-ci2-${{ hashFiles('.bazelversion') }}-
 
       - name: Fetch
         run: |
-          for i in $(seq 10); do 
+          for i in $(seq 10); do
             bazel --bazelrc=$GITHUB_WORKSPACE/.github/workflows/ci.bazelrc cquery 'attr(tags, "amd64", ...)' && break
             sleep 10;
           done
@@ -42,26 +43,29 @@ jobs:
 
       - name: Install Deps
         run: |
-          go install github.com/google/go-containerregistry/cmd/crane@main
-          go install github.com/reproducible-containers/diffoci/cmd/diffoci@master
-          go install filippo.io/mkcert@master
+          go install github.com/google/go-containerregistry/cmd/crane@v0.21.6
+          go install github.com/reproducible-containers/diffoci/cmd/diffoci@v0.1.8
+          go install filippo.io/mkcert@latest
           sudo curl -fsSL "https://github.com/project-zot/zot/releases/download/v2.0.2-rc2/zot-linux-amd64-minimal" > /usr/local/bin/zot
           sudo chmod +x /usr/local/bin/zot
 
       - name: Diff All Images
         id: diff
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          ./private/tools/diff.bash \
+          ./private/tools/diff/diff.bash \
             --query-bazel --registry-spawn-https \
-            --head-ref ${{ github.head_ref }} \
-            --base-ref ${{ github.event.pull_request.base.ref }} \
+            --head-ref "$HEAD_REF" \
+            --base-ref "$BASE_REF" \
             --set-github-output-on-diff \
             --skip-image-index \
             --jobs $(($(nproc --all) * 2)) \
             --logs ./verbose.log \
             --report ./report.log
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         id: report
         with:
           name: "Report"
@@ -69,40 +73,65 @@ jobs:
             ./verbose.log
             ./report.log
 
-      - uses: peter-evans/find-comment@v3
+      - name: Write diff to job output for forks
+        if: ${{ github.event.pull_request.head.repo.fork && steps.diff.outputs.changed_targets }}
+        env:
+          CHANGED: ${{ steps.diff.outputs.changed_targets }}
+        run: |
+          echo "This pull request has modified the following images:"
+          echo "$CHANGED"
+
+      - name: Find Comment
         id: fc
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-author: "github-actions[bot]"
-          body-includes: 🌳 🔄 Image Check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COMMENT_ID=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            --jq '.[] | select(.user.login=="github-actions[bot]" and (.body | contains("🌳 🔄 Image Check"))) | .id' | head -n 1)
+          echo "comment-id=$COMMENT_ID" >> "$GITHUB_OUTPUT"
 
       - name: Report diff
         if: ${{ !github.event.pull_request.head.repo.fork && steps.diff.outputs.changed_targets }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            🌳 🔄 Image Check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_ID: ${{ steps.fc.outputs.comment-id }}
+          CHANGED: ${{ steps.diff.outputs.changed_targets }}
+          REPORT_URL: ${{ steps.report.outputs.artifact-url }}
+        run: |
+          BODY=$(cat <<EOF
+          🌳 🔄 Image Check
 
-            This pull request has modified the following images:
+          This pull request has modified the following images:
 
-            ```starlark
-            ${{steps.diff.outputs.changed_targets}}
-            ```
+          \`\`\`starlark
+          $CHANGED
+          \`\`\`
 
-            You can check the details in the report [here](${{steps.report.outputs.artifact-url}})
-          edit-mode: replace
+          You can check the details in the report [here]($REPORT_URL)
+          EOF
+          )
+          if [ -n "$COMMENT_ID" ]; then
+            gh api -X PATCH repos/${{ github.repository }}/issues/comments/$COMMENT_ID -f body="$BODY"
+          else
+            gh api -X POST repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments -f body="$BODY"
+          fi
 
       - name: Report no diff
         if: ${{ !github.event.pull_request.head.repo.fork && !steps.diff.outputs.changed_targets }}
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            🌳 🔄 Image Check
-            This pull request doesn't make any changes to the images. 👍
-            You can check the details in the report [here](${{steps.report.outputs.artifact-url}})
-          edit-mode: replace
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_ID: ${{ steps.fc.outputs.comment-id }}
+          REPORT_URL: ${{ steps.report.outputs.artifact-url }}
+        run: |
+          BODY=$(cat <<EOF
+          🌳 🔄 Image Check
+          This pull request doesn't make any changes to the images. 👍
+          You can check the details in the report [here]($REPORT_URL)
+          EOF
+          )
+          if [ -n "$COMMENT_ID" ]; then
+            gh api -X PATCH repos/${{ github.repository }}/issues/comments/$COMMENT_ID -f body="$BODY"
+          else
+            gh api -X POST repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments -f body="$BODY"
+          fi
