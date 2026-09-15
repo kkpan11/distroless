@@ -15,7 +15,9 @@ jobs:
     name: Check lockfile up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Check lockfile
         run: bazel mod deps --lockfile_mode=error
 
@@ -23,28 +25,21 @@ jobs:
     name: CI build and unit test
     runs-on: distroless-ci-large-ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Mount bazel caches
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             ~/.cache/bazel-repo
-          key: bazel-cache-deps-ci1-${{ github.sha }}
+          key: bazel-cache-deps-ci1-${{ hashFiles('.bazelversion') }}-${{ github.sha }}
           restore-keys: |
-            bazel-cache-deps-ci1-${{ github.sha }}
-            bazel-cache-deps-ci1-
-      - name: Free space
-        run: |
-          sudo apt-get remove -y '^dotnet-.*'
-          sudo apt-get remove -y '^llvm-.*'
-          sudo apt-get remove -y 'php.*'
-          sudo apt-get remove -y azure-cli google-cloud-cli google-chrome-stable firefox powershell mono-devel
-          sudo apt-get autoremove -y
-          sudo apt-get clean
-          rm -rf /usr/share/dotnet/
+            bazel-cache-deps-ci1-${{ hashFiles('.bazelversion') }}-
+
       - name: Fetch # this can take a long time if there are a lot of errors
         run: |
-          for i in $(seq 10); do 
+          for i in $(seq 10); do
             bazel --bazelrc=$GITHUB_WORKSPACE/.github/workflows/ci.bazelrc fetch //... && break || sleep 180;
           done
       - name: Build All Images
@@ -61,29 +56,21 @@ jobs:
     name: CI image tests
     runs-on: distroless-ci-large-ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Mount bazel caches
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             ~/.cache/bazel-repo
-          key: bazel-cache-deps-ci2-${{ github.sha }}
+          key: bazel-cache-deps-ci2-${{ hashFiles('.bazelversion') }}-${{ github.sha }}
           restore-keys: |
-            bazel-cache-deps-ci2-${{ github.sha }}
-            bazel-cache-deps-ci2-
-      - name: Free space
-        run: |
-          sudo apt-get remove -y '^dotnet-.*'
-          sudo apt-get remove -y '^llvm-.*'
-          sudo apt-get remove -y 'php.*'
-          sudo apt-get remove -y azure-cli google-cloud-cli google-chrome-stable firefox powershell mono-devel
-          sudo apt-get autoremove -y
-          sudo apt-get clean
-          rm -rf /usr/share/dotnet/
+            bazel-cache-deps-ci2-${{ hashFiles('.bazelversion') }}-
 
       - name: Fetch
         run: |
-          for i in $(seq 20); do 
+          for i in $(seq 20); do
             bazel --bazelrc=$GITHUB_WORKSPACE/.github/workflows/ci.bazelrc cquery 'attr(tags, "amd64", ...)' && break
             sleep 10;
           done
