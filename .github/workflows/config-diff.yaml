@@ -1,0 +1,106 @@
+name: Config Check
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr_branch
+          persist-credentials: false
+
+      - name: Build :sign_and_push.query for PR
+        run: |
+          cd pr_branch
+          bazel build :sign_and_push.query
+          cp bazel-bin/sign_and_push_query ../pr_query_output.txt
+          cd ..
+
+      - name: Checkout main Branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          path: main_branch
+          persist-credentials: false
+
+      - name: Build :sign_and_push.query for main
+        run: |
+          cd main_branch
+          bazel build :sign_and_push.query
+          cp bazel-bin/sign_and_push_query ../main_query_output.txt
+          cd ..
+
+      - name: Diff the query outputs
+        id: diff
+        run: |
+          # diff may exit with non-zero
+          DIFF_OUTPUT=$(diff -u <(sort main_query_output.txt) <(sort pr_query_output.txt)) || true
+          
+          if [ "$DIFF_OUTPUT" ]; then
+            echo "$DIFF_OUTPUT"
+            echo "changed_build<<EOF" >> $GITHUB_OUTPUT
+            echo "$DIFF_OUTPUT" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Find Comment
+        id: fc
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          COMMENT_ID=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            --jq '.[] | select(.user.login=="github-actions[bot]" and (.body | contains("🌳 🔧 Config Check"))) | .id' | head -n 1)
+          echo "comment-id=$COMMENT_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Report diff
+        if: ${{ !github.event.pull_request.head.repo.fork && steps.diff.outputs.changed_build }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_ID: ${{ steps.fc.outputs.comment-id }}
+          DIFF: ${{ steps.diff.outputs.changed_build }}
+        run: |
+          BODY=$(cat <<EOF
+          🌳 🔧 Config Check
+
+          This pull request has modified the root BUILD
+
+          \`\`\`diff
+          $DIFF
+          \`\`\`
+          EOF
+          )
+          if [ -n "$COMMENT_ID" ]; then
+            gh api -X PATCH repos/${{ github.repository }}/issues/comments/$COMMENT_ID -f body="$BODY"
+          else
+            gh api -X POST repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments -f body="$BODY"
+          fi
+
+      - name: Report no diff
+        if: ${{ !github.event.pull_request.head.repo.fork && !steps.diff.outputs.changed_build }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_ID: ${{ steps.fc.outputs.comment-id }}
+        run: |
+          BODY="🌳 🔧 Config Check
+
+          This pull request has not modified the root BUILD"
+          if [ -n "$COMMENT_ID" ]; then
+            gh api -X PATCH repos/${{ github.repository }}/issues/comments/$COMMENT_ID -f body="$BODY"
+          else
+            gh api -X POST repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments -f body="$BODY"
+          fi
