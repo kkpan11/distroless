@@ -1,127 +1,47 @@
-load("@container_structure_test//:defs.bzl", "container_structure_test")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index")
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
-load("//:checksums.bzl", ARCHITECTURES = "BASE_ARCHITECTURES")
-load("//private/util:deb.bzl", "deb")
+load("//private/util:tar.bzl", "tar")
+load(":config.bzl", "PYTHON_ARCHITECTURES", "PYTHON_DISTROS", "PYTHON_PACKAGES")
+load(":ldconfig.bzl", "python3_ldconfig")
+load(":python.bzl", "python3_image", "python3_image_index")
+load(":version_test.bzl", "clean_python_version_test")
 
 package(default_visibility = ["//visibility:public"])
 
-USERS = [
-    "root",
-    "nonroot",
-]
-
-DISTROS = [
-    "debian12",
-]
-
-DISTRO_VERSION = {
-    "debian12": "3.11",
-}
-
 [
-    pkg_tar(
-        name = "python_aliases_%s" % distro,
-        symlinks = {
-            "/usr/bin/python": "/usr/bin/python" + DISTRO_VERSION[distro],
-            "/usr/bin/python3": "/usr/bin/python" + DISTRO_VERSION[distro],
-        },
+    tar(
+        name = "ldconfig_cache_{}".format(arch),
+        srcs = ["ldconfig/ld.so.cache.{}".format(arch)],
+        args = [
+            "--format",
+            "gnutar",
+        ],
+        extension = "tar.gz",
+        mtree = ["etc/ld.so.cache uid=0 gid=0 uname=root gname=root mode=0644 time=0 type=file content=$(location ldconfig/ld.so.cache.{})".format(arch)],
     )
-    for distro in DISTROS
+    for arch in PYTHON_ARCHITECTURES["debian13"]
 ]
 
 [
-    oci_image_index(
-        name = ("python3" if (not mode) else mode[1:]) + "_" + user + "_" + distro,
-        images = [
-            ("python3" if (not mode) else mode[1:]) + "_" + user + "_" + arch + "_" + distro
-            for arch in ARCHITECTURES
-        ],
+    python3_image(
+        arch = arch,
+        distro = distro,
+        packages = PYTHON_PACKAGES[distro],
     )
-    for mode in [
-        "",
-        ":debug",
-    ]
-    for user in USERS
-    for distro in DISTROS
+    for distro in PYTHON_DISTROS
+    for arch in PYTHON_ARCHITECTURES[distro]
 ]
 
 [
-    oci_image(
-        name = ("python3" if (not mode) else mode[1:]) + "_" + user + "_" + arch + "_" + distro,
-        # Based on //cc so that C extensions work properly.
-        base = "//cc" + (mode if mode else ":cc") + "_" + user + "_" + arch + "_" + distro,
-        entrypoint = [
-            "/usr/bin/python" + DISTRO_VERSION[distro],
-        ],
-        # Use UTF-8 encoding for file system: match modern Linux
-        env = {"LANG": "C.UTF-8"},
-        tars = [
-            deb.package(arch, distro, "libbz2-1.0"),
-            deb.package(arch, distro, "libdb5.3"),
-            deb.package(arch, distro, "libexpat1"),
-            deb.package(arch, distro, "liblzma5"),
-            deb.package(arch, distro, "libsqlite3-0"),
-            deb.package(arch, distro, "libuuid1"),
-            deb.package(arch, distro, "libncursesw6"),
-            deb.package(arch, distro, "libtinfo6"),
-            deb.package(arch, distro, "python3-distutils"),
-            deb.package(arch, distro, "zlib1g"),
-            deb.package(arch, distro, "libcom-err2"),
-            deb.package(arch, distro, "libcrypt1"),
-            deb.package(arch, distro, "libgssapi-krb5-2"),
-            deb.package(arch, distro, "libk5crypto3"),
-            deb.package(arch, distro, "libkeyutils1"),
-            deb.package(arch, distro, "libkrb5-3"),
-            deb.package(arch, distro, "libkrb5support0"),
-            deb.package(arch, distro, "libnsl2"),
-            deb.package(arch, distro, "libreadline8"),
-            deb.package(arch, distro, "libtirpc3"),
-            deb.package(arch, distro, "libffi8"),
-            deb.package(arch, distro, "libpython3.11-minimal"),
-            deb.package(arch, distro, "libpython3.11-stdlib"),
-            deb.package(arch, distro, "python3.11-minimal"),
-            ":python_aliases_%s" % distro,
-        ],
+    python3_image_index(
+        architectures = PYTHON_ARCHITECTURES[distro],
+        distro = distro,
     )
-    for mode in [
-        "",
-        ":debug",
-    ]
-    for user in USERS
-    for arch in ARCHITECTURES
-    for distro in DISTROS
+    for distro in PYTHON_DISTROS
 ]
 
-[
-    container_structure_test(
-        name = "python3_" + user + "_" + arch + "_" + distro + "_test",
-        size = "medium",
-        configs = ["testdata/python3.yaml"],
-        image = ":python3_" + user + "_" + arch + "_" + distro,
-        tags = [
-            "manual",
-            arch,
-        ],
-    )
-    for user in USERS
-    for arch in ARCHITECTURES
-    for distro in DISTROS
-]
+# ldconfig.so.cache generation
+python3_ldconfig(
+    architectures = PYTHON_ARCHITECTURES["debian13"],
+    distro = "debian13",
+)
 
-# tests for version-specific things
-[
-    container_structure_test(
-        name = "version_specific_" + user + "_" + arch + "_" + distro + "_test",
-        size = "medium",
-        configs = ["testdata/" + distro + ".yaml"],
-        image = ":python3_" + user + "_" + arch + "_" + distro,
-        tags = [
-            "manual",
-            arch,
-        ],
-    )
-    for user in USERS
-    for arch in ARCHITECTURES
-    for distro in DISTROS
-]
+clean_python_version_test(name = "clean_python_version_test")
