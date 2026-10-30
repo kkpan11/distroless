@@ -1,303 +1,259 @@
-load("//:checksums.bzl", "ARCHITECTURES", "BASE_ARCHITECTURES")
-load("//base:distro.bzl", "DISTROS")
+load("//base:config.bzl", "BASE_ARCHITECTURES", "BASE_DISTROS")
+load("//cc:config.bzl", "CC_ARCHITECTURES", "CC_DISTROS")
+load("//java:config.bzl", "JAVA_ARCHITECTURES", "JAVA_DISTROS", "JAVA_MAJOR_VERSIONS")
+load("//nodejs:config.bzl", "NODEJS_ARCHITECTURES", "NODEJS_DISTROS", "NODEJS_MAJOR_VERSIONS")
 load("//private/oci:defs.bzl", "sign_and_push_all")
+load("//private/tools/lifecycle:defs.bzl", "attach_lifecycle_tags")
+load("//python3:config.bzl", "PYTHON_ARCHITECTURES", "PYTHON_DISTROS")
+load("//static:config.bzl", "STATIC_ARCHITECTURES", "STATIC_DISTROS")
 
 package(default_visibility = ["//visibility:public"])
 
-DEFAULT_DISTRO = "debian12"
+DEFAULT_DISTRO = "debian13"
 
-## STATIC
-STATIC_VARIANTS = [
-    ("latest", "static", "root"),
-    ("nonroot", "static", "nonroot"),
-    ("debug", "static_debug", "root"),
-    ("debug-nonroot", "static_debug", "nonroot"),
-]
-
-STATIC = {
-    "{REGISTRY}/{PROJECT_ID}/static:" + tag_base + "-" + arch: "//base:" + label + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in STATIC_VARIANTS
-}
-
-# oci_image_index
-STATIC |= {
-    "{REGISTRY}/{PROJECT_ID}/static:" + tag_base: "//base:" + label + "_" + user + "_" + DEFAULT_DISTRO
-    for (tag_base, label, user) in STATIC_VARIANTS
-}
-
-STATIC |= {
-    "{REGISTRY}/{PROJECT_ID}/static-" + distro + ":" + tag_base + "-" + arch: "//base:" + label + "_" + user + "_" + arch + "_" + distro
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in STATIC_VARIANTS
-    for distro in DISTROS
-}
-
-# oci_image_index
-STATIC |= {
-    "{REGISTRY}/{PROJECT_ID}/static-" + distro + ":" + tag_base: "//base:" + label + "_" + user + "_" + distro
-    for (tag_base, label, user) in STATIC_VARIANTS
-    for distro in DISTROS
-}
-
-## BASE
-BASE_VARIANTS = [
-    ("latest", "base", "root"),
-    ("nonroot", "base", "nonroot"),
-    ("debug", "debug", "root"),
-    ("debug-nonroot", "debug", "nonroot"),
-]
-
-BASE = {
-    "{REGISTRY}/{PROJECT_ID}/base:" + tag_base + "-" + arch: "//base:" + label + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in BASE_VARIANTS
-}
-
-# oci_image_index
-BASE |= {
-    "{REGISTRY}/{PROJECT_ID}/base:" + tag_base: "//base:" + label + "_" + user + "_" + DEFAULT_DISTRO
-    for (tag_base, label, user) in BASE_VARIANTS
-}
-
-BASE |= {
-    "{REGISTRY}/{PROJECT_ID}/base-" + distro + ":" + tag_base + "-" + arch: "//base:" + label + "_" + user + "_" + arch + "_" + distro
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in BASE_VARIANTS
-    for distro in DISTROS
-}
-
-# oci_image_index
-BASE |= {
-    "{REGISTRY}/{PROJECT_ID}/base-" + distro + ":" + tag_base: "//base:" + label + "_" + user + "_" + distro
-    for (tag_base, label, user) in BASE_VARIANTS
-    for distro in DISTROS
-}
-
-## BASE NOSSL
-BASE_NOSSL_VARIANTS = [
-    ("latest", "base_nossl", "root"),
-    ("nonroot", "base_nossl", "nonroot"),
-    ("debug", "base_nossl_debug", "root"),
-    ("debug-nonroot", "base_nossl_debug", "nonroot"),
-]
-
-BASE_NOSSL = {
-    "{REGISTRY}/{PROJECT_ID}/base-nossl:" + tag_base + "-" + arch: "//base:" + label + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in BASE_NOSSL_VARIANTS
-}
-
-# oci_image_index
-BASE_NOSSL |= {
-    "{REGISTRY}/{PROJECT_ID}/base-nossl:" + tag_base: "//base:" + label + "_" + user + "_" + DEFAULT_DISTRO
-    for (tag_base, label, user) in BASE_NOSSL_VARIANTS
-}
-
-BASE_NOSSL |= {
-    "{REGISTRY}/{PROJECT_ID}/base-nossl-" + distro + ":" + tag_base + "-" + arch: "//base:" + label + "_" + user + "_" + arch + "_" + distro
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in BASE_NOSSL_VARIANTS
-    for distro in DISTROS
-}
-
-# oci_image_index
-BASE_NOSSL |= {
-    "{REGISTRY}/{PROJECT_ID}/base-nossl-" + distro + ":" + tag_base: "//base:" + label + "_" + user + "_" + distro
-    for (tag_base, label, user) in BASE_NOSSL_VARIANTS
-    for distro in DISTROS
-}
-
-## CC
-CC_VARIANTS = [
-    ("latest", "cc", "root"),
-    ("nonroot", "cc", "nonroot"),
-    ("debug", "debug", "root"),
-    ("debug-nonroot", "debug", "nonroot"),
-]
-
-CC = {
-    "{REGISTRY}/{PROJECT_ID}/cc:" + tag_base + "-" + arch: "//cc:" + label + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in CC_VARIANTS
-}
-
-# oci_image_index
-CC |= {
-    "{REGISTRY}/{PROJECT_ID}/cc:" + tag_base: "//cc:" + label + "_" + user + "_" + DEFAULT_DISTRO
-    for (tag_base, label, user) in CC_VARIANTS
-}
-
-CC |= {
-    "{REGISTRY}/{PROJECT_ID}/cc-" + distro + ":" + tag_base + "-" + arch: "//cc:" + label + "_" + user + "_" + arch + "_" + distro
-    for arch in ARCHITECTURES
-    for (tag_base, label, user) in CC_VARIANTS
-    for distro in DISTROS
-}
-
-# oci_image_index
-CC |= {
-    "{REGISTRY}/{PROJECT_ID}/cc-" + distro + ":" + tag_base: "//cc:" + label + "_" + user + "_" + distro
-    for (tag_base, label, user) in CC_VARIANTS
-    for distro in DISTROS
-}
-
-## PYTHON3
-PYTHON3_VARIATIONS = [
-    ("latest", "python3", "root"),
-    ("nonroot", "python3", "nonroot"),
-    ("debug", "debug", "root"),
-    ("debug-nonroot", "debug", "nonroot"),
-]
-
-PYTHON3 = {
-    "{REGISTRY}/{PROJECT_ID}/python3:" + tag_base + "-" + arch: "//python3:" + label + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
-    for arch in BASE_ARCHITECTURES
-    for (tag_base, label, user) in PYTHON3_VARIATIONS
-}
-
-# oci_image_index
-PYTHON3 |= {
-    "{REGISTRY}/{PROJECT_ID}/python3:" + tag_base: "//python3:" + label + "_" + user + "_" + DEFAULT_DISTRO
-    for (tag_base, label, user) in PYTHON3_VARIATIONS
-}
-
-# python on debian12 has moved out of experimental
-PYTHON3 |= {
-    "{REGISTRY}/{PROJECT_ID}/python3-debian12:" + tag_base + "-" + arch: "//python3:" + label + "_" + user + "_" + arch + "_debian12"
-    for arch in BASE_ARCHITECTURES
-    for (tag_base, label, user) in PYTHON3_VARIATIONS
-}
-
-# oci_image_index
-PYTHON3 |= {
-    "{REGISTRY}/{PROJECT_ID}/python3-debian12:" + tag_base: "//python3:" + label + "_" + user + "_debian12"
-    for (tag_base, label, user) in PYTHON3_VARIATIONS
-}
-
-## NODEJS
-NODEJS_VERSIONS = [
-    "20",
-    "22",
-]
-
-NODEJS_VARIATIONS = [
+VARIANTS = [
     ("latest", "", "root"),
     ("nonroot", "", "nonroot"),
     ("debug", "_debug", "root"),
     ("debug-nonroot", "_debug", "nonroot"),
 ]
 
+###############
+# STATIC      #
+###############
+STATIC = {
+    "{REGISTRY}/{PROJECT_ID}/static:" + tag_base + "-" + arch: "//static:static" + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for arch in STATIC_ARCHITECTURES[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+STATIC |= {
+    "{REGISTRY}/{PROJECT_ID}/static:" + tag_base: "//static:static" + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+STATIC |= {
+    "{REGISTRY}/{PROJECT_ID}/static-" + distro + ":" + tag_base + "-" + arch: "//static:static" + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in STATIC_DISTROS
+    for arch in STATIC_ARCHITECTURES[distro]
+}
+
+# oci_image_index
+STATIC |= {
+    "{REGISTRY}/{PROJECT_ID}/static-" + distro + ":" + tag_base: "//static:static" + debug_mode + "_" + user + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in STATIC_DISTROS
+}
+
+###############
+# BASE        #
+###############
+BASE = {
+    "{REGISTRY}/{PROJECT_ID}/base:" + tag_base + "-" + arch: "//base:base" + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for arch in BASE_ARCHITECTURES[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+BASE |= {
+    "{REGISTRY}/{PROJECT_ID}/base:" + tag_base: "//base:base" + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+BASE |= {
+    "{REGISTRY}/{PROJECT_ID}/base-" + distro + ":" + tag_base + "-" + arch: "//base:base" + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for distro in BASE_DISTROS
+    for arch in BASE_ARCHITECTURES[distro]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+BASE |= {
+    "{REGISTRY}/{PROJECT_ID}/base-" + distro + ":" + tag_base: "//base:base" + debug_mode + "_" + user + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in BASE_DISTROS
+}
+
+###############
+# BASE_NOSSL  #
+###############
+BASE_NOSSL = {
+    "{REGISTRY}/{PROJECT_ID}/base-nossl:" + tag_base + "-" + arch: "//base:base_nossl" + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for arch in BASE_ARCHITECTURES[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+BASE_NOSSL |= {
+    "{REGISTRY}/{PROJECT_ID}/base-nossl:" + tag_base: "//base:base_nossl" + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+BASE_NOSSL |= {
+    "{REGISTRY}/{PROJECT_ID}/base-nossl-" + distro + ":" + tag_base + "-" + arch: "//base:base_nossl" + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in BASE_DISTROS
+    for arch in BASE_ARCHITECTURES[distro]
+}
+
+# oci_image_index
+BASE_NOSSL |= {
+    "{REGISTRY}/{PROJECT_ID}/base-nossl-" + distro + ":" + tag_base: "//base:base_nossl" + debug_mode + "_" + user + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in BASE_DISTROS
+}
+
+###############
+# CC          #
+###############
+CC = {
+    "{REGISTRY}/{PROJECT_ID}/cc:" + tag_base + "-" + arch: "//cc:cc" + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for arch in CC_ARCHITECTURES[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+CC |= {
+    "{REGISTRY}/{PROJECT_ID}/cc:" + tag_base: "//cc:cc" + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+CC |= {
+    "{REGISTRY}/{PROJECT_ID}/cc-" + distro + ":" + tag_base + "-" + arch: "//cc:cc" + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in CC_DISTROS
+    for arch in CC_ARCHITECTURES[distro]
+}
+
+# oci_image_index
+CC |= {
+    "{REGISTRY}/{PROJECT_ID}/cc-" + distro + ":" + tag_base: "//cc:cc" + debug_mode + "_" + user + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in CC_DISTROS
+}
+
+###############
+# PYTHON 3    #
+###############
+PYTHON3 = {
+    "{REGISTRY}/{PROJECT_ID}/python3:" + tag_base + "-" + arch: "//python3:python3" + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for arch in PYTHON_ARCHITECTURES[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+PYTHON3 |= {
+    "{REGISTRY}/{PROJECT_ID}/python3:" + tag_base: "//python3:python3" + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+PYTHON3 |= {
+    "{REGISTRY}/{PROJECT_ID}/python3-" + distro + ":" + tag_base + "-" + arch: "//python3:python3" + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for distro in PYTHON_DISTROS
+    for arch in PYTHON_ARCHITECTURES[distro]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+PYTHON3 |= {
+    "{REGISTRY}/{PROJECT_ID}/python3-" + distro + ":" + tag_base: "//python3:python3" + debug_mode + "_" + user + "_" + distro
+    for distro in PYTHON_DISTROS
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+###############
+# NODEJS      #
+###############
 NODEJS = {
-    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + "-" + distro + ":" + tag_base + "-" + arch: "//nodejs:nodejs" + version + label + "_" + user + "_" + arch + "_" + distro
-    for arch in ARCHITECTURES
-    for distro in DISTROS
-    for version in NODEJS_VERSIONS
-    for (tag_base, label, user) in NODEJS_VARIATIONS
+    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + "-" + distro + ":" + tag_base + "-" + arch: "//nodejs:nodejs" + version + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for version in NODEJS_MAJOR_VERSIONS
+    for distro in NODEJS_DISTROS
+    for arch in NODEJS_ARCHITECTURES[distro][version]
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
 # oci_image_index
 NODEJS |= {
-    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + "-" + distro + ":" + tag_base: "//nodejs:nodejs" + version + label + "_" + user + "_" + distro
-    for distro in DISTROS
-    for version in NODEJS_VERSIONS
-    for (tag_base, label, user) in NODEJS_VARIATIONS
+    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + "-" + distro + ":" + tag_base: "//nodejs:nodejs" + version + debug_mode + "_" + user + "_" + distro
+    for version in NODEJS_MAJOR_VERSIONS
+    for distro in NODEJS_DISTROS
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
 NODEJS |= {
-    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + ":" + tag_base + "-" + arch: "//nodejs:nodejs" + version + label + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
-    for arch in ARCHITECTURES
-    for version in NODEJS_VERSIONS
-    for (tag_base, label, user) in NODEJS_VARIATIONS
+    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + ":" + tag_base + "-" + arch: "//nodejs:nodejs" + version + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for version in NODEJS_MAJOR_VERSIONS
+    for arch in NODEJS_ARCHITECTURES[DEFAULT_DISTRO][version]
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
 # oci_image_index
 NODEJS |= {
-    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + ":" + tag_base: "//nodejs:nodejs" + version + label + "_" + user + "_" + DEFAULT_DISTRO
-    for version in NODEJS_VERSIONS
-    for (tag_base, label, user) in NODEJS_VARIATIONS
+    "{REGISTRY}/{PROJECT_ID}/nodejs" + version + ":" + tag_base: "//nodejs:nodejs" + version + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for version in NODEJS_MAJOR_VERSIONS
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
-## JAVA_BASE
-JAVA_ARCHITECTURES = BASE_ARCHITECTURES + [
-    "s390x",
-    "ppc64le",
-]
-
-JAVA_VARIATIONS = [
-    ("latest", "root"),
-    ("nonroot", "nonroot"),
-    ("debug", "debug_root"),
-    ("debug-nonroot", "debug_nonroot"),
-]
-
+###############
+# JAVA_BASE   #
+###############
 JAVA_BASE = {
-    "{REGISTRY}/{PROJECT_ID}/java-base:latest": "//java:java_base_root_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java-base:nonroot": "//java:java_base_nonroot_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java-base:debug": "//java:java_base_debug_root_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java-base:debug-nonroot": "//java:java_base_debug_nonroot_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java-base-debian12:latest": "//java:java_base_root_amd64_debian12",
-    "{REGISTRY}/{PROJECT_ID}/java-base-debian12:nonroot": "//java:java_base_nonroot_amd64_debian12",
-    "{REGISTRY}/{PROJECT_ID}/java-base-debian12:debug": "//java:java_base_debug_root_amd64_debian12",
-    "{REGISTRY}/{PROJECT_ID}/java-base-debian12:debug-nonroot": "//java:java_base_debug_nonroot_amd64_debian12",
+    "{REGISTRY}/{PROJECT_ID}/java-base:" + tag_base + "-" + arch: "//java:java_base" + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for arch in JAVA_ARCHITECTURES[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
 JAVA_BASE |= {
-    "{REGISTRY}/{PROJECT_ID}/java-base-debian12:" + tag_base + "-" + arch: "//java:java_base_" + label + "_" + arch + "_debian12"
-    for arch in JAVA_ARCHITECTURES
-    for (tag_base, label) in JAVA_VARIATIONS
+    "{REGISTRY}/{PROJECT_ID}/java-base:" + tag_base: "//java:java_base" + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
 JAVA_BASE |= {
-    "{REGISTRY}/{PROJECT_ID}/java-base-debian12:" + tag_base: "//java:java_base_" + label + "_debian12"
-    for (tag_base, label) in JAVA_VARIATIONS
+    "{REGISTRY}/{PROJECT_ID}/java-base-" + distro + ":" + tag_base + "-" + arch: "//java:java_base" + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for distro in JAVA_DISTROS
+    for arch in JAVA_ARCHITECTURES[distro]
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
-## JAVA17
-JAVA17 = {
-    "{REGISTRY}/{PROJECT_ID}/java17:latest": "//java:java17_root_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java17:nonroot": "//java:java17_nonroot_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java17:debug": "//java:java17_debug_root_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java17:debug-nonroot": "//java:java17_debug_nonroot_amd64_" + DEFAULT_DISTRO,
-    "{REGISTRY}/{PROJECT_ID}/java17-debian12:latest": "//java:java17_root_amd64_debian12",
-    "{REGISTRY}/{PROJECT_ID}/java17-debian12:nonroot": "//java:java17_nonroot_amd64_debian12",
-    "{REGISTRY}/{PROJECT_ID}/java17-debian12:debug": "//java:java17_debug_root_amd64_debian12",
-    "{REGISTRY}/{PROJECT_ID}/java17-debian12:debug-nonroot": "//java:java17_debug_nonroot_amd64_debian12",
+JAVA_BASE |= {
+    "{REGISTRY}/{PROJECT_ID}/java-base-" + distro + ":" + tag_base: "//java:java_base" + debug_mode + "_" + user + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in JAVA_DISTROS
 }
 
-JAVA17 |= {
-    "{REGISTRY}/{PROJECT_ID}/java17-debian12:" + tag_base + "-" + arch: "//java:java17_" + label + "_" + arch + "_debian12"
-    for (tag_base, label) in JAVA_VARIATIONS
-    for arch in JAVA_ARCHITECTURES
-}
-
-JAVA17 |= {
-    "{REGISTRY}/{PROJECT_ID}/java17-debian12:" + tag_base: "//java:java17_" + label + "_debian12"
-    for (tag_base, label) in JAVA_VARIATIONS
-}
-
-## JAVA 21 from temurin
-JAVA_21_ARCHITECTURES = [
-    "amd64",
-    "arm64",
-    "ppc64le",
-]
-
-JAVA21 = {
-    "{REGISTRY}/{PROJECT_ID}/java21-debian12:" + tag_base + "-" + arch: "//java:java21_" + label + "_" + arch + "_debian12"
-    for (tag_base, label) in JAVA_VARIATIONS
-    for arch in JAVA_21_ARCHITECTURES
+###############
+# JAVA        #
+###############
+JAVA = {
+    "{REGISTRY}/{PROJECT_ID}/java" + version + ":" + tag_base + "-" + arch: "//java:java" + version + debug_mode + "_" + user + "_" + arch + "_" + DEFAULT_DISTRO
+    for version in JAVA_MAJOR_VERSIONS[DEFAULT_DISTRO]
+    for arch in JAVA_ARCHITECTURES[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
 # oci_image_index
-JAVA21 |= {
-    "{REGISTRY}/{PROJECT_ID}/java21:" + tag_base: "//java:java21_" + label + "_" + DEFAULT_DISTRO
-    for (tag_base, label) in JAVA_VARIATIONS
+JAVA |= {
+    "{REGISTRY}/{PROJECT_ID}/java" + version + ":" + tag_base: "//java:java" + version + debug_mode + "_" + user + "_" + DEFAULT_DISTRO
+    for version in JAVA_MAJOR_VERSIONS[DEFAULT_DISTRO]
+    for (tag_base, debug_mode, user) in VARIANTS
 }
 
-JAVA21 |= {
-    "{REGISTRY}/{PROJECT_ID}/java21-debian12:" + tag_base: "//java:java21_" + label + "_debian12"
-    for (tag_base, label) in JAVA_VARIATIONS
+JAVA |= {
+    "{REGISTRY}/{PROJECT_ID}/java" + version + "-" + distro + ":" + tag_base + "-" + arch: "//java:java" + version + debug_mode + "_" + user + "_" + arch + "_" + distro
+    for distro in JAVA_DISTROS
+    for version in JAVA_MAJOR_VERSIONS[distro]
+    for arch in JAVA_ARCHITECTURES[distro]
+    for (tag_base, debug_mode, user) in VARIANTS
+}
+
+# oci_image_index
+JAVA |= {
+    "{REGISTRY}/{PROJECT_ID}/java" + version + "-" + distro + ":" + tag_base: "//java:java" + version + debug_mode + "_" + user + "_" + distro
+    for (tag_base, debug_mode, user) in VARIANTS
+    for distro in JAVA_DISTROS
+    for version in JAVA_MAJOR_VERSIONS[distro]
 }
 
 ALL = {}
@@ -316,9 +272,7 @@ ALL |= NODEJS
 
 ALL |= JAVA_BASE
 
-ALL |= JAVA17
-
-ALL |= JAVA21
+ALL |= JAVA
 
 # create additional tags by appending COMMIT_SHA to all tags
 # remove "latest" if they contain it (this is brittle if we make funky changes):
@@ -333,5 +287,10 @@ ALL |= COMMIT_SUFFIXED_TAGS
 
 sign_and_push_all(
     name = "sign_and_push",
+    images = ALL,
+)
+
+attach_lifecycle_tags(
+    name = "attach_lifecycle_tags",
     images = ALL,
 )

@@ -5,6 +5,11 @@ on:
     - cron: "35 20 * * *"
   # allow this workflow to be manually run
   workflow_dispatch:
+    inputs:
+      skip_delay:
+        description: "Skip the 1 day buffer and take the newest snapshot (strictly newer than the current one)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -17,13 +22,26 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          go-version: "1.20"
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: "1.25"
 
       - name: Update snapshots
+        env:
+          # inputs.skip_delay is empty on scheduled runs, so the default 1 day buffer applies
+          SNAPSHOT_SKIP_DELAY: ${{ inputs.skip_delay == true }}
         run: ./knife github-update-snapshots
+
+      - name: Set up QEMU
+        if: env.DISTROLESS_DIFF
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
+
+      - name: Update ldconfig
+        if: env.DISTROLESS_DIFF
+        run: bazel run //python3:update_ldconfig
 
       - name: Run update sboms script
         if: env.DISTROLESS_DIFF
@@ -40,6 +58,8 @@ jobs:
       - name: Create commits
         if: env.DISTROLESS_DIFF
         id: create-commits
+        env:
+          ACTIONS_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
         run: |
           git checkout -b update-snapshots
 
@@ -50,6 +70,7 @@ jobs:
           # Commit changes
           git add .
           git commit -s -m "Bumping packages to latest stable versions"
+          git remote set-url origin https://x-access-token:${ACTIONS_TOKEN}@github.com/${{ github.repository }}.git
           git push --force origin HEAD
 
       - name: Create Pull Request
