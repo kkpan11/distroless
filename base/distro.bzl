@@ -1,1 +1,0 @@
-DISTROS = ["debian12"]

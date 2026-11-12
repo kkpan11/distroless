@@ -1,0 +1,13 @@
+timeout: 1800s # 30 minutes
+
+options:
+  machineType: E2_MEDIUM
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: mirror.gcr.io/library/buildpack-deps:trixie@sha256:8db3a3d1e68e0a88ed31c2256d0c0e3b127f80685e6b1f3a9bb31e22638b5e7b
+    env:
+      - PROJECT_ID=${PROJECT_ID}
+      - REGISTRY=gcr.io
+    entrypoint: bash
+    args: [".cloudbuild/lifecycle_tag.sh"]
