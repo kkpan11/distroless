@@ -1,0 +1,110 @@
+"nodejs image definitions"
+
+load("@container_structure_test//:defs.bzl", "container_structure_test")
+load("@node_versions//:versions.bzl", "NODEJS_VERSIONS")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index")
+load("//common:variables.bzl", "DEBUG_MODE", "OS_RELEASE", "USERS")
+load("//private/util:deb.bzl", "deb")
+load("//private/util:tar.bzl", "tar")
+
+def nodejs_image_index(distro, major_version, architectures):
+    """nodejs image index for a distro.
+
+    Args:
+        distro: name of distribution
+        major_version: version of nodejs
+        architectures: all architectures included in index
+    """
+    for mode in DEBUG_MODE:
+        for user in USERS:
+            oci_image_index(
+                name = "nodejs" + major_version + mode + "_" + user + "_" + distro,
+                images = [
+                    "nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro
+                    for arch in architectures
+                ],
+            )
+
+def _check_certificates_tar():
+    # only create once
+    if native.existing_rule("check_certificate"):
+        return
+
+    tar(
+        name = "check_certificate",
+        extension = "tar.gz",
+        srcs = ["testdata/check_certificate.js"],
+    )
+
+def nodejs_image(distro, major_version, arch, packages):
+    """nodejs and debug image with tests.
+
+    Args:
+        distro: name of distribution
+        major_version: version of nodejs
+        arch: the target arch
+        packages: any deb packages to add to the image
+    """
+
+    _version_key = major_version + "_" + arch
+    if _version_key not in NODEJS_VERSIONS:
+        fail("No version found for Node.js major version/arch: " + _version_key)
+    _annotations = {
+        "org.opencontainers.image.source": OS_RELEASE["HOME_URL"],
+        "com.google.distroless.nodejs.version": NODEJS_VERSIONS[_version_key],
+    }
+
+    for mode in DEBUG_MODE:
+        for user in USERS:
+            oci_image(
+                name = "nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro,
+                base = "//cc:cc" + mode + "_" + user + "_" + arch + "_" + distro,
+                entrypoint = ["/nodejs/bin/node"],
+                tars = [
+                    deb.package(arch, distro, pkg)
+                    for pkg in packages
+                ] + [
+                    "@nodejs" + major_version + "_" + arch,
+                ],
+                annotations = _annotations,
+            )
+
+    _check_certificates_tar()
+
+    for mode in DEBUG_MODE:
+        for user in USERS:
+            container_structure_test(
+                name = "nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro + "_test",
+                configs = [
+                    "testdata/nodejs" + major_version + ".yaml",
+                    "testdata/check_headers.yaml",
+                    "testdata/check_npm.yaml",
+                ],
+                image = "nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro,
+                tags = [
+                    arch,
+                    "manual",
+                ],
+            )
+
+    for mode in DEBUG_MODE:
+        for user in USERS:
+            oci_image(
+                name = "check_certificate_nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro,
+                base = "nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro,
+                tars = [
+                    ":check_certificate",
+                ],
+            )
+
+    for mode in DEBUG_MODE:
+        for user in USERS:
+            container_structure_test(
+                name = "check_certificate_nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro + "_test",
+                configs = ["testdata/check_certificate.yaml"],
+                image = "check_certificate_nodejs" + major_version + mode + "_" + user + "_" + arch + "_" + distro,
+                tags = [
+                    arch,
+                    "manual",
+                ],
+            )

@@ -1,0 +1,335 @@
+{
+	"packages": [
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "temurin-17-jre_17.0.21.1.0-p-2-0_amd64",
+			"name": "temurin-17-jre",
+			"sha256": "899a16f7493b6f4b002616622f9f9fee6a72444cb1d12b0419b49820d97120e8",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jre_17.0.21.1.0+2-0_amd64.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "temurin-17-jdk_17.0.21.1.0-p-2-0_amd64",
+			"name": "temurin-17-jdk",
+			"sha256": "e02e743241d889853ef54ea3b7ea508f97f9c43326d068393f7ee4f1c18b8f1a",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jdk_17.0.21.1.0+2-0_amd64.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "temurin-21-jre_21.0.13.1.0-p-2-0_amd64",
+			"name": "temurin-21-jre",
+			"sha256": "37ce42f822fc16bd8ca8d05d92472ccc3ba87fcb9cd1d60901152cc5723ae1ef",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jre_21.0.13.1.0+2-0_amd64.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "temurin-21-jdk_21.0.13.1.0-p-2-0_amd64",
+			"name": "temurin-21-jdk",
+			"sha256": "1e77f422f5f9b429bc47bcbc6c5a993a50435ee22b9aab03d7d04a631971efed",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jdk_21.0.13.1.0+2-0_amd64.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "temurin-25-jre_25.0.5.1.0-p-2-0_amd64",
+			"name": "temurin-25-jre",
+			"sha256": "6b49259e57f124c13913db2aa0a79cdc9a2079d3fa8c9f14f4db9b5067f143fc",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jre_25.0.5.1.0+2-0_amd64.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "amd64",
+			"dependencies": [],
+			"key": "temurin-25-jdk_25.0.5.1.0-p-2-0_amd64",
+			"name": "temurin-25-jdk",
+			"sha256": "e81401233cee70a79645ae2f7d90e060b9c08607d0f3100fc57a3d82da4e84d2",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jdk_25.0.5.1.0+2-0_amd64.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "temurin-17-jre_17.0.21.1.0-p-2-0_arm64",
+			"name": "temurin-17-jre",
+			"sha256": "095b0a5d64b7f50e0de7f88a24c091d27b538f825d97b5bc2d940951a8400bc5",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jre_17.0.21.1.0+2-0_arm64.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "temurin-17-jdk_17.0.21.1.0-p-2-0_arm64",
+			"name": "temurin-17-jdk",
+			"sha256": "ed934c748d2b6d4a34cdb4e4a7cdb124a9c8e79be3e8dce92ad7250df4860446",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jdk_17.0.21.1.0+2-0_arm64.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "temurin-21-jre_21.0.13.1.0-p-2-0_arm64",
+			"name": "temurin-21-jre",
+			"sha256": "a90d41d6fbdee461f28e3c3efdad1bfde59ce3eed3d920cce43715af63c58eab",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jre_21.0.13.1.0+2-0_arm64.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "temurin-21-jdk_21.0.13.1.0-p-2-0_arm64",
+			"name": "temurin-21-jdk",
+			"sha256": "e693a21e51c8e018a5db874661c0ad5286860a6d3f8d4f7d951af074e5b5217a",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jdk_21.0.13.1.0+2-0_arm64.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "temurin-25-jre_25.0.5.1.0-p-2-0_arm64",
+			"name": "temurin-25-jre",
+			"sha256": "e9b54972b71fbf19365017a821197d0ef6320d691c6b255ffcf7a9d8a172fe90",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jre_25.0.5.1.0+2-0_arm64.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "arm64",
+			"dependencies": [],
+			"key": "temurin-25-jdk_25.0.5.1.0-p-2-0_arm64",
+			"name": "temurin-25-jdk",
+			"sha256": "cff4a082312a9d7671ba5a8c2f97e97060448dafc9b1bfbc9f99e82568f2b0a0",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jdk_25.0.5.1.0+2-0_arm64.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "s390x",
+			"dependencies": [],
+			"key": "temurin-17-jre_17.0.21.1.0-p-2-0_s390x",
+			"name": "temurin-17-jre",
+			"sha256": "9fc12e886df63d82d1ab17a15a3504fbc18b4822e8b5a1cf22c2001e680e45a3",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jre_17.0.21.1.0+2-0_s390x.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "s390x",
+			"dependencies": [],
+			"key": "temurin-17-jdk_17.0.21.1.0-p-2-0_s390x",
+			"name": "temurin-17-jdk",
+			"sha256": "1c522f057d2a4c0cdd00ebda77b88212260f8d4bf5ecdb75565add049834f248",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jdk_17.0.21.1.0+2-0_s390x.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "s390x",
+			"dependencies": [],
+			"key": "temurin-21-jre_21.0.13.1.0-p-2-0_s390x",
+			"name": "temurin-21-jre",
+			"sha256": "504bd439c4bd6a4978946c78cd7cf3827ed9a09298383d80949e3dd701bfae98",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jre_21.0.13.1.0+2-0_s390x.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "s390x",
+			"dependencies": [],
+			"key": "temurin-21-jdk_21.0.13.1.0-p-2-0_s390x",
+			"name": "temurin-21-jdk",
+			"sha256": "7bae5f417ce17039f7e8cb050a9288840f1477d40cdf47f1024864e81b195b71",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jdk_21.0.13.1.0+2-0_s390x.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "s390x",
+			"dependencies": [],
+			"key": "temurin-25-jre_25.0.5.1.0-p-2-0_s390x",
+			"name": "temurin-25-jre",
+			"sha256": "dd5c57ea1f9e75a43b0d4a681cfca05e96cac4a482fdb870cd053cc61d325487",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jre_25.0.5.1.0+2-0_s390x.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "s390x",
+			"dependencies": [],
+			"key": "temurin-25-jdk_25.0.5.1.0-p-2-0_s390x",
+			"name": "temurin-25-jdk",
+			"sha256": "1909d4af239fd02cbaffca668daec9825a115fdfb6ed4968ec554707879800af",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jdk_25.0.5.1.0+2-0_s390x.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "ppc64el",
+			"dependencies": [],
+			"key": "temurin-17-jre_17.0.21.1.0-p-2-0_ppc64el",
+			"name": "temurin-17-jre",
+			"sha256": "ae729110c233a7562bd3b21e3c173896f9dd09081165cfbfa52cc4470e3d4642",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jre_17.0.21.1.0+2-0_ppc64el.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "ppc64el",
+			"dependencies": [],
+			"key": "temurin-17-jdk_17.0.21.1.0-p-2-0_ppc64el",
+			"name": "temurin-17-jdk",
+			"sha256": "acdf05eac7f7ad10fcb2e4de61cfbfa6dc0cca3b25e220e76bbd35fad1a1bfb9",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jdk_17.0.21.1.0+2-0_ppc64el.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "ppc64el",
+			"dependencies": [],
+			"key": "temurin-21-jre_21.0.13.1.0-p-2-0_ppc64el",
+			"name": "temurin-21-jre",
+			"sha256": "77b79ab6a16ef7c0dc8cf8825a142f83ec4b99a66b6e3449baeca1cb99b96e9e",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jre_21.0.13.1.0+2-0_ppc64el.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "ppc64el",
+			"dependencies": [],
+			"key": "temurin-21-jdk_21.0.13.1.0-p-2-0_ppc64el",
+			"name": "temurin-21-jdk",
+			"sha256": "7668c39f72fb0e7bc6586ec7b7fc536dbffa8e5d782df24ab6459869f360ab5e",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jdk_21.0.13.1.0+2-0_ppc64el.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "ppc64el",
+			"dependencies": [],
+			"key": "temurin-25-jre_25.0.5.1.0-p-2-0_ppc64el",
+			"name": "temurin-25-jre",
+			"sha256": "65bc0044cf5dd43ff8aee6eb8c010c096b64c9528214f0a7b9ae1e2af487f4ad",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jre_25.0.5.1.0+2-0_ppc64el.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "ppc64el",
+			"dependencies": [],
+			"key": "temurin-25-jdk_25.0.5.1.0-p-2-0_ppc64el",
+			"name": "temurin-25-jdk",
+			"sha256": "a7ba4b99aa63adeb644d74244c30c25608d129e37c76f161f9dccb13520b86d7",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jdk_25.0.5.1.0+2-0_ppc64el.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "riscv64",
+			"dependencies": [],
+			"key": "temurin-17-jre_17.0.21.1.0-p-2-0_riscv64",
+			"name": "temurin-17-jre",
+			"sha256": "9c51c943f5005610312f6018363e9e381977fd8e7435ea143635646a52a4b2dd",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jre_17.0.21.1.0+2-0_riscv64.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "riscv64",
+			"dependencies": [],
+			"key": "temurin-17-jdk_17.0.21.1.0-p-2-0_riscv64",
+			"name": "temurin-17-jdk",
+			"sha256": "e219792e11b010fc7c175a6a84e91d3789a4faadbc4af1f52fc918169789c55a",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-17/temurin-17-jdk_17.0.21.1.0+2-0_riscv64.deb"
+			],
+			"version": "17.0.21.1.0+2-0"
+		},
+		{
+			"arch": "riscv64",
+			"dependencies": [],
+			"key": "temurin-21-jre_21.0.13.1.0-p-2-0_riscv64",
+			"name": "temurin-21-jre",
+			"sha256": "d7161b9a3dbbcfe9a72d76dd6065e5a2802c06260c4985909f5518b23a27dad4",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jre_21.0.13.1.0+2-0_riscv64.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "riscv64",
+			"dependencies": [],
+			"key": "temurin-21-jdk_21.0.13.1.0-p-2-0_riscv64",
+			"name": "temurin-21-jdk",
+			"sha256": "4efe2a62f58862a7e86b22b27fd211573c58db1f9331067b09efcad18af8c743",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-21/temurin-21-jdk_21.0.13.1.0+2-0_riscv64.deb"
+			],
+			"version": "21.0.13.1.0+2-0"
+		},
+		{
+			"arch": "riscv64",
+			"dependencies": [],
+			"key": "temurin-25-jre_25.0.5.1.0-p-2-0_riscv64",
+			"name": "temurin-25-jre",
+			"sha256": "c15d312400c6618e18073195fbee70188190774a9676ea80e33f0247af25326d",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jre_25.0.5.1.0+2-0_riscv64.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		},
+		{
+			"arch": "riscv64",
+			"dependencies": [],
+			"key": "temurin-25-jdk_25.0.5.1.0-p-2-0_riscv64",
+			"name": "temurin-25-jdk",
+			"sha256": "95d59b0ea7f7fc7a70c6c6f03df24d5e33fda6af23deea0835ffa29a8002ad7f",
+			"urls": [
+				"https://packages.adoptium.net/artifactory/deb/pool/main/t/temurin-25/temurin-25-jdk_25.0.5.1.0+2-0_riscv64.deb"
+			],
+			"version": "25.0.5.1.0+2-0"
+		}
+	],
+	"version": 1
+}

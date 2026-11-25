@@ -1,14 +1,18 @@
+"cc_image rule for creating C++ container images"
+
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_oci//oci:defs.bzl", "oci_image")
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("//private/util:tar.bzl", "tar")
 
 def cc_image(name, srcs, base):
-    native.cc_binary(
+    cc_binary(
         name = "%s_binary" % name,
         srcs = srcs,
     )
 
-    pkg_tar(
+    tar(
         name = "%s_layer" % name,
+        extension = "tar.gz",
         srcs = [
             ":%s_binary" % name,
         ],
